@@ -3,7 +3,7 @@
 A **retro Game Boy-inspired Tetris** implemented in pure JavaScript, HTML, and CSS.  
 This project replicates the classic Tetris feel with pixelated graphics, scanlines, Game Boy color palette, 8-bit sound effects, and smooth animations.  
 
-![Game Boy Tetris Screenshot](screenshot.png)  <!-- Replace with your screenshot -->
+![Game Boy Tetris Screenshot](https://github.com/hassanimohammadreza/Game-Boy-Tetris/blob/main/assets/Tetris.png?raw=true)
 
 ---
 
