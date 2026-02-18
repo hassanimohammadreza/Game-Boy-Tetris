@@ -41,7 +41,7 @@ This project replicates the classic Tetris feel with pixelated graphics, scanlin
 
 You can try the game directly in your browser:
 
-[Live Demo Link]()
+[Live Demo Link](https://hassanimohammadreza.github.io/Game-Boy-Tetris/)
 
 ---
 
@@ -81,4 +81,3 @@ gameboy-tetris/
 ---
 
 Enjoy playing Tetris the Game Boy way! 🟩🕹️
-`https://hassanimohammadreza.github.io/Game-Boy-Tetris/`
