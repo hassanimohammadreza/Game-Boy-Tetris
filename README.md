@@ -78,6 +78,7 @@ gameboy-tetris/
 
 - Sound effects generated via Web Audio API
 
+
 ---
 
-Enjoy playing Tetris the Game Boy way! 🟩🕹️
+### ⭐ If you found this project useful, consider giving it a star!
