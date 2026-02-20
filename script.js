@@ -16,18 +16,28 @@ let board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
 const COLORS = ["#306230"];
 const TETROMINOS = [
     [[1,1,1,1]],
-    [[2,0,0],[2,2,2]],
-    [[0,0,3],[3,3,3]],
-    [[4,4],[4,4]],
-    [[0,5,5],[5,5,0]],
-    [[0,6,0],[6,6,6]],
-    [[7,7,0],[0,7,7]]
+    [[2,0,0],
+     [2,2,2]],
+    [[0,0,3],
+     [3,3,3]],
+    [[4,4],
+     [4,4]],
+    [[0,5,5],
+     [5,5,0]],
+    [[0,6,0],
+     [6,6,6]],
+    [[7,7,0],
+     [0,7,7]]
 ];
 
 let current = createTetromino();
 let nextDrop = Date.now();
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+document.addEventListener("keydown", () => {
+    if (audioCtx.state === "suspended") audioCtx.resume();
+}, { once: true });
 
 function playBeep(freq = 440, duration = 0.1) {
     const oscillator = audioCtx.createOscillator();
@@ -82,10 +92,17 @@ function drawBoard() {
 
 function scaleGame() {
     const container = document.querySelector(".container");
-    const scale = Math.min(window.innerWidth/container.offsetWidth, window.innerHeight/container.offsetHeight);
+
+    const scale = Math.min(
+        1,
+        window.innerWidth / container.offsetWidth,
+        window.innerHeight / container.offsetHeight
+    );
+
     container.style.transform = `scale(${scale})`;
-    container.style.transformOrigin = "center center";
+    container.style.transformOrigin = "top center";
 }
+
 window.addEventListener("resize", scaleGame);
 window.addEventListener("load", scaleGame);
 
@@ -128,53 +145,57 @@ function rotate(shape){
     return newShape;
 }
 
+const restartButton = document.getElementById("restartButton");
+
 function drawGameOver() {
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
     ctx.save();
-    ctx.fillStyle="#0f380f";
-    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = "#0f380f";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const alpha = 0.5 + 0.5*Math.sin(Date.now()/250);
+    const alpha = 0.5 + 0.5 * Math.sin(Date.now() / 250);
     ctx.globalAlpha = alpha;
-    ctx.fillStyle="#9bbc0f";
-    ctx.font="bold 28px 'Press Start 2P', monospace";
-    ctx.textAlign="center";
-    ctx.textBaseline="middle";
-    ctx.fillText("GAME OVER", canvas.width/2, canvas.height/2-40);
-
-    ctx.globalAlpha=1;
-    ctx.fillStyle="#9bbc0f";
-    ctx.fillRect(canvas.width/2-60, canvas.height/2+20, 120, 40);
-    ctx.fillStyle="#0f380f";
-    ctx.font="bold 16px 'Press Start 2P', monospace";
-    ctx.fillText("START", canvas.width/2, canvas.height/2+45);
+    ctx.fillStyle = "#9bbc0f";
+    ctx.font = "bold 28px 'Press Start 2P', monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 40);
+    ctx.globalAlpha = 1;
     ctx.restore();
+
+    restartButton.style.display = "block";
 }
 
-canvas.addEventListener("click", e=>{
-    if(!gameOver) return;
-    const rect=canvas.getBoundingClientRect();
-    const mouseX=e.clientX-rect.left;
-    const mouseY=e.clientY-rect.top;
-    if(mouseX>=canvas.width/2-60 && mouseX<=canvas.width/2+60 && mouseY>=canvas.height/2+20 && mouseY<=canvas.height/2+60){
-        board=Array.from({length:ROWS},()=>Array(COLS).fill(0));
-        score=0;
-        document.getElementById("score").innerText=score;
-        current=createTetromino();
-        gameOver=false;
-        playBeep(800,0.1);
-    }
+restartButton.addEventListener("click", () => {
+    board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+    score = 0;
+    document.getElementById("score").innerText = score;
+    current = createTetromino();
+    gameOver = false;
+    shakeTime = 0;
+    shakeOffset.intensity = 0;
+
+    restartButton.style.display = "none";
+    playBeep(800, 0.1);
 });
 
-document.addEventListener("keydown", event=>{
+
+
+document.addEventListener("keydown", event => {
     if(gameOver) return;
     if(event.key==="ArrowLeft" && !collision(-1,0,current.shape)) current.x--;
     if(event.key==="ArrowRight" && !collision(1,0,current.shape)) current.x++;
     if(event.key==="ArrowDown" && !collision(0,1,current.shape)) current.y++;
     if(event.key==="ArrowUp"){
-        const rotated=rotate(current.shape);
+        const rotated = rotate(current.shape);
         if(!collision(0,0,rotated)){
-            current.shape=rotated;
+            current.shape = rotated;
             playBeep(600,0.05);
+        } else {
+            if(!collision(-1,0,rotated)) current.x--;
+            else if(!collision(1,0,rotated)) current.x++;
         }
     }
 });
@@ -195,7 +216,12 @@ function update(){
             shake(80,4);
             clearLines();
             current=createTetromino();
-            if(collision(0,0,current.shape)) gameOver=true, playBeep(120,0.5);
+        if(collision(0,0,current.shape)) {
+            gameOver = true;
+            playBeep(120,0.5);
+            shake(200,5);
+            restartButton.style.display = "block";
+        }
         }
         nextDrop=now;
     }
